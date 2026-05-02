@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMOS WORDS — Sopa de Letras</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070b14;
+            --bg2: #0d1425;
+            --bg3: #111c35;
+            --panel: #0f172a;
+            --border: rgba(99, 179, 237, 0.15);
+            --accent1: #63b3ed;
+            --accent2: #9f7aea;
+            --accent3: #68d391;
+            --accent4: #f6ad55;
+            --accent5: #fc8181;
+            --accent6: #76e4f7;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --found: #68d391;
+            --select: rgba(99, 179, 237, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--d) ease-in-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: var(--op);
+                transform: scale(1.5);
+            }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 30%, rgba(99, 179, 237, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 35% at 80% 70%, rgba(159, 122, 234, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 50% 10%, rgba(104, 211, 145, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #app {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+
+        /* HEADER */
+        header {
+            width: 100%;
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            background: rgba(7, 11, 20, 0.85);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stat-pill {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.75rem;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.08em;
+            color: var(--text2);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .stat-pill strong {
+            color: var(--accent1);
+        }
+
+
+        /* MAIN LAYOUT */
+        .game-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 1.5rem 2rem;
+            display: grid;
+            grid-template-columns: 260px 1fr 260px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+
+        /* PANELS */
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            color: var(--text3);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+
+        /* LEVEL */
+        .level-display {
+            text-align: center;
+            padding: 0.75rem 0;
+        }
+
+        .level-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 15px rgba(99, 179, 237, 0.5));
+        }
+
+        .level-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            color: var(--text3);
+            font-family: 'Orbitron', monospace;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
+        }
+
+        .topic-badge {
+            display: inline-block;
+            margin-top: 0.6rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+
+        /* PROGRESS */
+        .progress-section {
+            margin-top: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.68rem;
+            color: var(--text3);
+            margin-bottom: 0.35rem;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.08em;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 5px;
+            background: var(--bg3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, var(--accent1), var(--accent2));
+            box-shadow: 0 0 8px rgba(99, 179, 237, 0.6);
+        }
+
+
+        /* DIFFICULTY */
+        .diff-section {
+            margin-top: 1rem;
+        }
+
+        .diff-stars {
+            display: flex;
+            gap: 4px;
+            margin-top: 0.4rem;
+        }
+
+        .diff-star {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .diff-star.on {
+            background: var(--accent4);
+            border-color: var(--accent4);
+            box-shadow: 0 0 6px rgba(246, 173, 85, 0.5);
+        }
+
+
+        /* MILESTONE */
+        .milestone-card {
+            margin-top: 1rem;
+            background: var(--bg3);
+            border: 1px solid rgba(159, 122, 234, 0.25);
+            border-radius: 10px;
+            padding: 0.8rem;
+            font-size: 0.75rem;
+            color: var(--text2);
+            line-height: 1.5;
+        }
+
+        .milestone-card strong {
+            color: var(--accent2);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+        }
+
+
+        /* WORD LIST */
+        .word-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .word-item {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg3);
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            font-weight: 500;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .word-item.found {
+            border-color: rgba(104, 211, 145, 0.4);
+            background: rgba(104, 211, 145, 0.08);
+            color: var(--found);
+        }
+
+        .word-item.found::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(104, 211, 145, 0.05), transparent);
+            animation: shimmer 2s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%)
+            }
+
+            100% {
+                transform: translateX(100%)
+            }
+        }
+
+        .word-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            flex-shrink: 0;
+            transition: all 0.4s;
+        }
+
+        .word-item.found .word-dot {
+            background: var(--found);
+            border-color: var(--found);
+            box-shadow: 0 0 8px rgba(104, 211, 145, 0.6);
+        }
+
+        .word-strikethrough {
+            position: absolute;
+            height: 2px;
+            background: var(--found);
+            left: 2rem;
+            right: 0.75rem;
+            top: 50%;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+            border-radius: 1px;
+        }
+
+        .word-item.found .word-strikethrough {
+            transform: scaleX(1);
+        }
+
+
+        /* DEFINITION */
+        .def-panel {
+            min-height: 90px;
+            background: var(--bg3);
+            border-radius: 10px;
+            padding: 0.8rem;
+            font-size: 0.78rem;
+            color: var(--text2);
+            line-height: 1.6;
+            border: 1px solid rgba(118, 228, 247, 0.15);
+            margin-top: 1rem;
+        }
+
+        .def-word {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            color: var(--accent6);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        .def-empty {
+            color: var(--text3);
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+
+
+        /* SCORE */
+        .score-big {
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--accent4);
+            filter: drop-shadow(0 0 10px rgba(246, 173, 85, 0.4));
+            line-height: 1;
+        }
+
+        .score-sub {
+            font-size: 0.6rem;
+            color: var(--text3);
+            letter-spacing: 0.2em;
+            margin-top: 0.25rem;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+        }
+
+
+        /* TIMER */
+        .timer-display {
+            text-align: center;
+            margin-top: 1rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent1);
+            filter: drop-shadow(0 0 8px rgba(99, 179, 237, 0.4));
+            transition: color 0.3s;
+        }
+
+        .timer-display.urgent {
+            color: var(--accent5);
+            filter: drop-shadow(0 0 8px rgba(252, 129, 129, 0.6));
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.05)
+            }
+        }
+
+        .timer-label {
+            font-size: 0.6rem;
+            color: var(--text3);
+            letter-spacing: 0.2em;
+            font-family: 'Orbitron', monospace;
+            text-align: center;
+            margin-top: 0.2rem;
+        }
+
+
+        /* COMBO */
+        .combo-display {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .combo-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent2);
+        }
+
+        .combo-label {
+            font-size: 0.6rem;
+            color: var(--text3);
+            letter-spacing: 0.15em;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .combo-bar {
+            margin-top: 0.4rem;
+            width: 100%;
+            height: 4px;
+            background: var(--bg3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .combo-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent2), var(--accent5));
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+
+        /* HINT BTN */
+        .hint-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.6rem;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 179, 237, 0.3);
+            background: rgba(99, 179, 237, 0.08);
+            color: var(--accent1);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .hint-btn:hover {
+            background: rgba(99, 179, 237, 0.15);
+            border-color: rgba(99, 179, 237, 0.5);
+        }
+
+        .hint-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+
+        /* GRID CENTER */
+        .grid-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .grid-wrapper {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            position: relative;
+            user-select: none;
+        }
+
+        .grid-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            color: var(--text3);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+
+        /* GRID TABLE */
+        #grid-table {
+            border-collapse: separate;
+            border-spacing: 2px;
+        }
+
+        .grid-cell {
+            width: 36px;
+            height: 36px;
+            text-align: center;
+            vertical-align: middle;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+            position: relative;
+            background: var(--bg3);
+        }
+
+        .grid-cell:hover {
+            color: var(--text);
+            background: rgba(99, 179, 237, 0.1);
+            border-color: rgba(99, 179, 237, 0.3);
+        }
+
+        .grid-cell.selecting {
+            background: var(--select);
+            color: white;
+            border-color: var(--accent1);
+            transform: scale(1.05);
+        }
+
+        .grid-cell.found-cell {
+            color: var(--found) !important;
+            border-color: rgba(104, 211, 145, 0.4) !important;
+        }
+
+        .grid-cell.hint-cell {
+            background: rgba(246, 173, 85, 0.25) !important;
+            border-color: var(--accent4) !important;
+            color: var(--accent4) !important;
+            animation: hintPulse 1s ease 3;
+        }
+
+        @keyframes hintPulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.1)
+            }
+        }
+
+
+        /* FOUND OVERLAY COLORS */
+        .found-0 {
+            background: rgba(99, 179, 237, 0.18) !important;
+        }
+
+        .found-1 {
+            background: rgba(159, 122, 234, 0.18) !important;
+        }
+
+        .found-2 {
+            background: rgba(104, 211, 145, 0.18) !important;
+        }
+
+        .found-3 {
+            background: rgba(246, 173, 85, 0.18) !important;
+        }
+
+        .found-4 {
+            background: rgba(252, 129, 129, 0.18) !important;
+        }
+
+        .found-5 {
+            background: rgba(118, 228, 247, 0.18) !important;
+        }
+
+        .found-6 {
+            background: rgba(236, 201, 75, 0.18) !important;
+        }
+
+        .found-7 {
+            background: rgba(237, 137, 54, 0.18) !important;
+        }
+
+
+        /* SELECTION LINE */
+        .selection-info {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            color: var(--accent1);
+            min-height: 1.2em;
+            text-align: center;
+        }
+
+
+        /* LEVEL COMPLETE MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 11, 20, 0.92);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 460px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-sub {
+            font-size: 0.85rem;
+            color: var(--text2);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-stat {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .modal-stat-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent4);
+        }
+
+        .modal-stat-label {
+            font-size: 0.65rem;
+            color: var(--text3);
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.1em;
+        }
+
+        .modal-btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: white;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(99, 179, 237, 0.3);
+        }
+
+        .modal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(99, 179, 237, 0.5);
+        }
+
+
+        /* LEVEL SELECT SCREEN */
+        #level-select-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 11, 20, 0.96);
+            backdrop-filter: blur(12px);
+            z-index: 150;
+            overflow-y: auto;
+            padding: 2rem;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #level-select-screen.show {
+            display: flex;
+        }
+
+        .ls-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .ls-sub {
+            color: var(--text3);
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .level-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .level-card:hover:not(.locked) {
+            transform: translateY(-2px);
+            border-color: rgba(99, 179, 237, 0.4);
+            box-shadow: 0 4px 20px rgba(99, 179, 237, 0.15);
+        }
+
+        .level-card.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .level-card.completed {
+            border-color: rgba(104, 211, 145, 0.3);
+            background: rgba(104, 211, 145, 0.05);
+        }
+
+        .lc-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--accent1);
+        }
+
+        .lc-topic {
+            font-size: 0.68rem;
+            color: var(--text3);
+            margin-top: 0.2rem;
+            letter-spacing: 0.05em;
+        }
+
+        .lc-stars {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .lc-star {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+        }
+
+        .lc-star.on {
+            background: var(--accent4);
+            border-color: var(--accent4);
+        }
+
+        .lc-lock {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.75rem;
+        }
+
+        .lc-check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.75rem;
+            color: var(--found);
+        }
+
+
+        /* MAP BTN */
+        .map-btn {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg3);
+            color: var(--text2);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .map-btn:hover {
+            border-color: rgba(99, 179, 237, 0.4);
+            color: var(--accent1);
+        }
+
+
+        /* TOAST */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--accent3);
+            z-index: 300;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 20px rgba(104, 211, 145, 0.2);
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+
+        /* FOUND FLASH */
+        .found-flash {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent3);
+            pointer-events: none;
+            z-index: 400;
+            text-shadow: 0 0 20px rgba(104, 211, 145, 0.8);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .found-flash.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .found-flash.hide {
+            transform: translate(-50%, -80%) scale(1.2);
+            opacity: 0;
+        }
+
+
+        /* SCORE POP */
+        .score-pop {
+            position: fixed;
+            pointer-events: none;
+            z-index: 400;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--accent4);
+            text-shadow: 0 0 10px rgba(246, 173, 85, 0.6);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+
+        .score-pop.show {
+            opacity: 1;
+            transform: translateY(-40px) !important;
+        }
+
+
+        @media(max-width:900px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+
+            .panel-left,
+            .panel-right {
+                display: none;
+            }
+
+            .grid-cell {
+                width: 28px;
+                height: 28px;
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="stars"></div>
+    <div id="app">
+        <header>
+            <div class="logo">COSMOS<span>●</span>WORDS</div>
+            <div class="header-stats">
+                <div class="stat-pill">NIVEL <strong id="hdr-level">1</strong></div>
+                <div class="stat-pill">⭐ <strong id="hdr-score">0</strong></div>
+                <div class="stat-pill">🔥 <strong id="hdr-combo">x1</strong></div>
+                <button class="map-btn" onclick="showLevelSelect()">🗺 MAPA</button>
+            </div>
+        </header>
+
+
+        <div class="game-container">
+            <!-- LEFT PANEL -->
+            <div class="panel panel-left">
+                <div class="panel-title">📊 Nivel & Progreso</div>
+                <div class="level-display">
+                    <div class="level-num" id="level-num">1</div>
+                    <div class="level-label">NIVEL</div>
+                    <span class="topic-badge" id="topic-badge">—</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-label"><span>PALABRAS</span><span id="prog-text">0/0</span></div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="diff-section">
+                    <div class="panel-title" style="border:none;margin:0;padding:0;margin-bottom:0.4rem">DIFICULTAD
+                    </div>
+                    <div class="diff-stars" id="diff-stars"></div>
+                </div>
+                <div class="milestone-card" id="milestone-card">
+                    <strong>PRÓXIMO LOGRO</strong>
+                    <span id="milestone-text">Completa el nivel 1 para desbloquear el nivel 2</span>
+                </div>
+            </div>
+
+
+            <!-- CENTER GRID -->
+            <div class="grid-center">
+                <div class="grid-wrapper">
+                    <div class="grid-title" id="grid-title">CARGANDO...</div>
+                    <table id="grid-table"></table>
+                </div>
+                <div class="selection-info" id="selection-info">Selecciona letras arrastrando</div>
+            </div>
+
+
+            <!-- RIGHT PANEL -->
+            <div class="panel panel-right">
+                <div class="panel-title">🏆 Puntuación</div>
+                <div class="score-big" id="score-display">0</div>
+                <div class="score-sub">PUNTOS TOTALES</div>
+                <div class="timer-display" id="timer-display">05:00</div>
+                <div class="timer-label">TIEMPO RESTANTE</div>
+                <div class="combo-display">
+                    <div class="combo-num" id="combo-num">x1</div>
+                    <div class="combo-label">COMBO</div>
+                    <div class="combo-bar">
+                        <div class="combo-fill" id="combo-fill" style="width:0%"></div>
+                    </div>
+                </div>
+                <button class="hint-btn" id="hint-btn" onclick="useHint()">💡 PISTA (3 restantes)</button>
+                <div class="panel-title" style="margin-top:1.25rem">PALABRAS A ENCONTRAR</div>
+                <div class="word-list" id="word-list"></div>
+                <div class="def-panel" id="def-panel">
+                    <span class="def-empty">Encuentra una palabra para ver su definición</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- LEVEL SELECT -->
+    <div id="level-select-screen">
+        <div class="ls-title">MAPA DE NIVELES</div>
+        <div class="ls-sub">Selecciona un nivel desbloqueado para jugar</div>
+        <div class="levels-grid" id="levels-grid"></div>
+        <button class="modal-btn" style="margin-top:2rem" onclick="hideLevelSelect()">CERRAR MAPA</button>
+    </div>
+
+
+    <!-- MODAL LEVEL COMPLETE -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon">🎉</div>
+            <div class="modal-title" id="modal-title">¡NIVEL COMPLETADO!</div>
+            <div class="modal-sub" id="modal-sub">Has encontrado todas las palabras</div>
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <div class="modal-stat-num" id="modal-score">0</div>
+                    <div class="modal-stat-label">PUNTOS</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-num" id="modal-time">0s</div>
+                    <div class="modal-stat-label">TIEMPO</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-num" id="modal-combo">x1</div>
+                    <div class="modal-stat-label">COMBO MÁX</div>
+                </div>
+            </div>
+            <button class="modal-btn" id="modal-btn" onclick="nextLevel()">SIGUIENTE NIVEL →</button>
+        </div>
+    </div>
+
+
+    <div id="toast">¡Palabra encontrada!</div>
+    <div class="found-flash" id="found-flash">¡ENCONTRADA!</div>
+
+
+    <script>
+        // ═══════════════════════════════════════════════
+        // STARFIELD
+        // ═══════════════════════════════════════════════
+        (function () {
+            const c = document.getElementById('stars');
+            for (let i = 0; i < 120; i++) {
+                const s = document.createElement('div'); s.className = 'star';
+                const sz = Math.random() * 2.5 + 0.5;
+                s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random() * 100}%;left:${Math.random() * 100}%;--d:${2 + Math.random() * 4}s;--op:${0.3 + Math.random() * 0.7};animation-delay:${Math.random() * 4}s`;
+                c.appendChild(s);
+            }
+        })();
+
+
+        // ═══════════════════════════════════════════════
+        // LEVEL DATA — 30 LEVELS
+        // ═══════════════════════════════════════════════
+        const LEVELS = [
+            {
+                id: 1, topic: "Filosofía Antigua", color: "#63b3ed", diff: 1,
+                time: 300, gridSize: 12,
+                words: [
+                    { w: "SOCRATES", def: "Filósofo griego que usaba el diálogo como método de enseñanza." },
+                    { w: "PLATON", def: "Discípulo de Sócrates y fundador de la Academia de Atenas." },
+                    { w: "ARISTOTELES", def: "Filósofo que clasificó el conocimiento en lógica, metafísica y ética." },
+                    { w: "LOGOS", def: "Término griego que significa razón, palabra o discurso." },
+                    { w: "ETICA", def: "Rama de la filosofía que estudia la moral y la conducta humana." },
+                    { w: "ALMA", def: "Concepto filosófico referido al principio vital del ser humano." },
+                ]
+            },
+            {
+                id: 2, topic: "Renacimiento", color: "#f6ad55", diff: 2,
+                time: 300, gridSize: 13,
+                words: [
+                    { w: "HUMANISMO", def: "Corriente cultural que pone al ser humano como centro del universo." },
+                    { w: "LEONARDO", def: "Genio renacentista: pintor, escultor, científico e inventor." },
+                    { w: "MIGUEL ANGEL", def: "Autor de la Capilla Sixtina y del David de mármol." },
+                    { w: "RAFAEL", def: "Pintor renacentista conocido por sus Madonnas y La Escuela de Atenas." },
+                    { w: "FLORENCIA", def: "Ciudad italiana, cuna del Renacimiento y de los Médici." },
+                    { w: "PERSPECTIVA", def: "Técnica artística para representar profundidad en una superficie plana." },
+                    { w: "MECENAS", def: "Persona que financia artistas y artesanos, como Lorenzo de Médici." },
+                ]
+            },
+            {
+                id: 3, topic: "Sistema Solar", color: "#9f7aea", diff: 1,
+                time: 280, gridSize: 12,
+                words: [
+                    { w: "MERCURIO", def: "Planeta más cercano al Sol, sin atmósfera significativa." },
+                    { w: "VENUS", def: "El planeta más caliente del sistema solar por su efecto invernadero." },
+                    { w: "MARTE", def: "El planeta rojo, con el volcán más alto del sistema solar." },
+                    { w: "JUPITER", def: "El planeta más grande, con la Gran Mancha Roja." },
+                    { w: "SATURNO", def: "Planeta famoso por sus anillos de hielo y roca." },
+                    { w: "URANO", def: "Planeta helado que gira de lado sobre su eje." },
+                ]
+            },
+            {
+                id: 4, topic: "Cuerpo Humano", color: "#fc8181", diff: 2,
+                time: 300, gridSize: 13,
+                words: [
+                    { w: "CEREBRO", def: "Órgano central del sistema nervioso que controla el cuerpo." },
+                    { w: "CORAZON", def: "Músculo que bombea sangre a todo el organismo." },
+                    { w: "PULMON", def: "Órgano respiratorio que intercambia oxígeno y dióxido de carbono." },
+                    { w: "HIGADO", def: "Glándula que filtra la sangre y produce bilis." },
+                    { w: "RIÑON", def: "Órgano que filtra la sangre y produce orina." },
+                    { w: "NERVIO", def: "Estructura que transmite impulsos eléctricos por el cuerpo." },
+                    { w: "MUSCULO", def: "Tejido contráctil que permite el movimiento corporal." },
+                ]
+            },
+            {
+                id: 5, topic: "Geografía Mundial", color: "#68d391", diff: 2,
+                time: 300, gridSize: 13,
+                words: [
+                    { w: "HIMALAYA", def: "La cadena montañosa más alta del mundo, en Asia." },
+                    { w: "AMAZONAS", def: "El río más caudaloso del mundo, en América del Sur." },
+                    { w: "SAHARA", def: "El desierto caliente más grande del mundo, en África." },
+                    { w: "EVEREST", def: "La montaña más alta del mundo, en Nepal." },
+                    { w: "PACÍFICO", def: "El océano más grande y profundo del planeta." },
+                    { w: "ANTARTICA", def: "El continente más frío, ventoso y árido de la Tierra." },
+                ]
+            },
+            {
+                id: 6, topic: "Historia Antigua", color: "#f6ad55", diff: 2,
+                time: 300, gridSize: 13,
+                words: [
+                    { w: "FARAON", def: "Gobernante del Antiguo Egipto considerado dios en la Tierra." },
+                    { w: "PIRAMIDE", def: "Monumento funerario de piedra construido por los egipcios." },
+                    { w: "CESAR", def: "General y dictador romano que fue asesinado en los Idus de Marzo." },
+                    { w: "GLADIADOR", def: "Combatiente romano que luchaba en el anfiteatro para el público." },
+                    { w: "COLISEO", def: "Anfiteatro romano construido entre los años 70 y 80 d.C." },
+                    { w: "SENADO", def: "Institución política de la República Romana." },
+                ]
+            },
+            {
+                id: 7, topic: "Física Clásica", color: "#76e4f7", diff: 3,
+                time: 280, gridSize: 13,
+                words: [
+                    { w: "GRAVEDAD", def: "Fuerza de atracción entre objetos con masa, descrita por Newton." },
+                    { w: "INERCIA", def: "Propiedad de la materia de resistir cambios en su estado de movimiento." },
+                    { w: "FRICCION", def: "Fuerza que se opone al movimiento relativo entre superficies." },
+                    { w: "ENERGIA", def: "Capacidad de un sistema para realizar trabajo." },
+                    { w: "ACELERACION", def: "Variación de la velocidad de un objeto en el tiempo." },
+                    { w: "MASA", def: "Cantidad de materia que contiene un cuerpo." },
+                    { w: "VECTOR", def: "Magnitud física que tiene módulo, dirección y sentido." },
+                ]
+            },
+            {
+                id: 8, topic: "Arte y Pintura", color: "#9f7aea", diff: 2,
+                time: 300, gridSize: 13,
+                words: [
+                    { w: "IMPRESIONISMO", def: "Movimiento pictórico francés del siglo XIX que capta la luz." },
+                    { w: "MONET", def: "Padre del Impresionismo, creador de series de Nenúfares." },
+                    { w: "VAN GOGH", def: "Postimpresionista holandés, autor de La Noche Estrellada." },
+                    { w: "PICASSO", def: "Cofundador del Cubismo y autor del Guernica." },
+                    { w: "OLEO", def: "Técnica pictórica que usa pigmentos disueltos en aceite." },
+                    { w: "LIENZO", def: "Tela preparada sobre la que se pinta." },
+                ]
+            },
+            {
+                id: 9, topic: "Biología Celular", color: "#68d391", diff: 3,
+                time: 280, gridSize: 13,
+                words: [
+                    { w: "ADN", def: "Molécula que contiene la información genética de los seres vivos." },
+                    { w: "CELULA", def: "Unidad básica de la vida, con membrana, citoplasma y núcleo." },
+                    { w: "MITOSIS", def: "División celular que produce dos células hijas idénticas." },
+                    { w: "NUCLEO", def: "Orgánulo que contiene el material genético de la célula." },
+                    { w: "MEMBRANA", def: "Capa que rodea y protege la célula regulando el paso de sustancias." },
+                    { w: "RIBOSOMA", def: "Orgánulo celular donde se sintetizan las proteínas." },
+                    { w: "PROTEINA", def: "Macromolécula formada por aminoácidos con funciones estructurales y catalíticas." },
+                ]
+            },
+            {
+                id: 10, topic: "Ilustración & Revolución", color: "#f6ad55", diff: 3,
+                time: 260, gridSize: 14,
+                words: [
+                    { w: "VOLTAIRE", def: "Filósofo ilustrado francés defensor de la libertad de expresión." },
+                    { w: "ROUSSEAU", def: "Filósofo que postuló el contrato social y la bondad natural humana." },
+                    { w: "REVOLUCION", def: "Transformación radical y rápida de un sistema político o social." },
+                    { w: "GUILLOTINA", def: "Instrumento usado en la Revolución Francesa para la ejecución." },
+                    { w: "NAPOLEON", def: "General y Emperador francés que conquistó gran parte de Europa." },
+                    { w: "LIBERTAD", def: "Principio fundamental de la Revolución Francesa: libertad, igualdad, fraternidad." },
+                ]
+            },
+            {
+                id: 11, topic: "Astronomía", color: "#9f7aea", diff: 3,
+                time: 260, gridSize: 14,
+                words: [
+                    { w: "GALAXIA", def: "Sistema gravitacionalmente ligado de estrellas, gas y polvo." },
+                    { w: "AGUJERO NEGRO", def: "Región del espacio con gravedad tan intensa que ni la luz escapa." },
+                    { w: "NEBULOSA", def: "Nube de gas y polvo interestelar, cuna de nuevas estrellas." },
+                    { w: "SUPERNOVA", def: "Explosión masiva que marca el final de vida de una estrella gigante." },
+                    { w: "PULSAR", def: "Estrella de neutrones que emite radiación en pulsos regulares." },
+                    { w: "COMETA", def: "Cuerpo celeste de hielo y roca con cola luminosa al acercarse al Sol." },
+                    { w: "ECLIPSE", def: "Ocultación de un astro por la interposición de otro cuerpo celeste." },
+                ]
+            },
+            {
+                id: 12, topic: "Química Básica", color: "#76e4f7", diff: 3,
+                time: 260, gridSize: 14,
+                words: [
+                    { w: "ATOMO", def: "Unidad básica de la materia, compuesta de protones, neutrones y electrones." },
+                    { w: "MOLECULA", def: "Conjunto de átomos unidos por enlaces químicos." },
+                    { w: "ELECTRON", def: "Partícula subatómica de carga negativa que orbita el núcleo." },
+                    { w: "PROTON", def: "Partícula del núcleo atómico con carga positiva." },
+                    { w: "ENLACE", def: "Fuerza que mantiene unidos a los átomos en una molécula." },
+                    { w: "OXIGENO", def: "Elemento químico esencial para la respiración celular." },
+                    { w: "HIDROGENO", def: "Elemento más abundante del universo, componente del agua." },
+                ]
+            },
+            {
+                id: 13, topic: "Edad Media", color: "#f6ad55", diff: 3,
+                time: 260, gridSize: 14,
+                words: [
+                    { w: "FEUDALISMO", def: "Sistema político medieval basado en la cesión de tierras a cambio de lealtad." },
+                    { w: "CRUZADA", def: "Expedición militar cristiana para recuperar Tierra Santa." },
+                    { w: "CATEDRAL", def: "Iglesia principal de una diócesis, expresión máxima del arte gótico." },
+                    { w: "CABALLERO", def: "Guerrero medieval montado a caballo con código de honor." },
+                    { w: "CASTILLO", def: "Fortaleza medieval que servía de residencia y defensa señorial." },
+                    { w: "PLAGA", def: "La Peste Negra del siglo XIV mató un tercio de la población europea." },
+                ]
+            },
+            {
+                id: 14, topic: "Ética & Moral", color: "#68d391", diff: 3,
+                time: 280, gridSize: 14,
+                words: [
+                    { w: "JUSTICIA", def: "Virtud cardinal que da a cada uno lo que le corresponde." },
+                    { w: "VIRTUD", def: "Disposición habitual hacia el bien según Aristóteles." },
+                    { w: "DEBER", def: "Obligación moral fundamentada en la razón según Kant." },
+                    { w: "DILEMA", def: "Situación en que se debe elegir entre dos opciones igualmente problemáticas." },
+                    { w: "EMPATIA", def: "Capacidad de comprender y compartir los sentimientos ajenos." },
+                    { w: "AUTONOMIA", def: "Capacidad de darse a uno mismo las propias normas morales." },
+                    { w: "BIEN", def: "Aquello que es valorado positivamente desde una perspectiva moral." },
+                ]
+            },
+            {
+                id: 15, topic: "Revolución Científica", color: "#63b3ed", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "GALILEO", def: "Astrónomo que confirmó el heliocentrismo con el telescopio." },
+                    { w: "NEWTON", def: "Físico que formuló las leyes de la gravitación universal." },
+                    { w: "COPÉRNICO", def: "Astrónomo que propuso que la Tierra gira alrededor del Sol." },
+                    { w: "KEPLER", def: "Astrónomo que describió las leyes del movimiento planetario." },
+                    { w: "TELESCOPIO", def: "Instrumento óptico que permite ver objetos lejanos del cielo." },
+                    { w: "MICROSCOPIO", def: "Instrumento que permite ver objetos demasiado pequeños para el ojo." },
+                    { w: "EXPERIMENTO", def: "Procedimiento para verificar o refutar hipótesis científicas." },
+                ]
+            },
+            {
+                id: 16, topic: "Historiadores", color: "#f6ad55", diff: 3,
+                time: 260, gridSize: 14,
+                words: [
+                    { w: "HERODOTO", def: "Considerado el padre de la Historia por sus Historias sobre las Guerras Médicas." },
+                    { w: "TUCIDIDES", def: "Historiador griego que narró la Guerra del Peloponeso con rigor crítico." },
+                    { w: "TITO LIVIO", def: "Historiador romano que escribió la historia de Roma desde sus orígenes." },
+                    { w: "TACITO", def: "Historiador romano conocido por sus Anales y sus Historias imperiales." },
+                    { w: "MAQUIAVELO", def: "Historiador florentino que escribió El Príncipe sobre el poder político." },
+                    { w: "GIBBON", def: "Autor de La Historia de la Decadencia y Caída del Imperio Romano." },
+                ]
+            },
+            {
+                id: 17, topic: "Física Moderna", color: "#9f7aea", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "RELATIVIDAD", def: "Teoría de Einstein que describe el espacio-tiempo como una entidad unificada." },
+                    { w: "CUANTO", def: "Cantidad mínima de energía que puede emitirse o absorberse." },
+                    { w: "FOTON", def: "Partícula elemental portadora de la fuerza electromagnética (luz)." },
+                    { w: "NEUTRON", def: "Partícula del núcleo atómico sin carga eléctrica." },
+                    { w: "FUSION", def: "Reacción nuclear en que dos núcleos ligeros se unen liberando energía." },
+                    { w: "PLASMA", def: "Cuarto estado de la materia, gas ionizado a temperaturas extremas." },
+                    { w: "EINSTEIN", def: "Físico que formuló E=mc² y la Teoría de la Relatividad." },
+                ]
+            },
+            {
+                id: 18, topic: "Arte Moderno", color: "#fc8181", diff: 3,
+                time: 260, gridSize: 14,
+                words: [
+                    { w: "CUBISMO", def: "Movimiento artístico que fragmenta objetos en formas geométricas." },
+                    { w: "DADAISMO", def: "Movimiento de vanguardia que rechazaba la lógica y el orden burgués." },
+                    { w: "SURREALISMO", def: "Movimiento que explora el inconsciente y los sueños en el arte." },
+                    { w: "ABSTRACTO", def: "Arte que no representa objetos del mundo visible." },
+                    { w: "BAUHAUS", def: "Escuela de diseño alemana que unificó arte y tecnología." },
+                    { w: "ESCULTURA", def: "Arte de crear figuras tridimensionales en piedra, metal u otro material." },
+                ]
+            },
+            {
+                id: 19, topic: "Geografía América", color: "#68d391", diff: 3,
+                time: 260, gridSize: 14,
+                words: [
+                    { w: "ANDES", def: "La cordillera más larga del mundo, recorre América del Sur." },
+                    { w: "AMAZON", def: "La selva tropical más grande del planeta en América del Sur." },
+                    { w: "PATAGONIA", def: "Región inhóspita en el extremo sur de América del Sur." },
+                    { w: "CARIBE", def: "Mar semicerrado rodeado de islas tropicales en América Central." },
+                    { w: "ATACAMA", def: "El desierto más árido del mundo, en Chile y Perú." },
+                    { w: "TITICACA", def: "El lago navegable más alto del mundo, en Bolivia y Perú." },
+                    { w: "ORINOCO", def: "Uno de los ríos más largos de América del Sur, en Venezuela." },
+                ]
+            },
+            {
+                id: 20, topic: "Biología: Evolución", color: "#76e4f7", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "DARWIN", def: "Naturalista que propuso la teoría de la evolución por selección natural." },
+                    { w: "EVOLUCION", def: "Proceso de cambio gradual en las características de las especies." },
+                    { w: "MUTACION", def: "Cambio en la secuencia del ADN que puede transmitirse a la descendencia." },
+                    { w: "SELECCION", def: "Mecanismo por el cual los organismos mejor adaptados sobreviven." },
+                    { w: "ESPECIE", def: "Conjunto de organismos que pueden reproducirse entre sí." },
+                    { w: "FOSIL", def: "Resto o huella de un ser vivo conservado en rocas sedimentarias." },
+                    { w: "ADAPTACION", def: "Característica que mejora la supervivencia de un organismo en su ambiente." },
+                ]
+            },
+            {
+                id: 21, topic: "Guerras Mundiales", color: "#fc8181", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "TRINCHERA", def: "Zanja de guerra usada en la Primera Guerra Mundial como defensa." },
+                    { w: "ARMISTICIO", def: "Acuerdo para detener las hostilidades en una guerra." },
+                    { w: "HOLOCAUSTO", def: "Genocidio sistemático de judíos y otros grupos por los nazis." },
+                    { w: "ALIADOS", def: "Coalición de países que luchó contra el Eje en la Segunda Guerra Mundial." },
+                    { w: "NORMANDIA", def: "Región de Francia donde se realizó el Desembarco del Día D en 1944." },
+                    { w: "HIROSHIMA", def: "Ciudad japonesa sobre la que se lanzó la primera bomba atómica." },
+                ]
+            },
+            {
+                id: 22, topic: "Filosofía Moderna", color: "#63b3ed", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "DESCARTES", def: "Filósofo racionalista autor de 'Cogito ergo sum' (Pienso, luego existo)." },
+                    { w: "KANT", def: "Filósofo que unificó racionalismo y empirismo con la Crítica de la Razón Pura." },
+                    { w: "HEGEL", def: "Filósofo que desarrolló la dialéctica como método de pensamiento." },
+                    { w: "NIETZSCHE", def: "Filósofo que proclamó 'Dios ha muerto' y propuso el Superhombre." },
+                    { w: "EMPIRISMO", def: "Corriente filosófica que basa el conocimiento en la experiencia sensible." },
+                    { w: "RACIONALISMO", def: "Corriente que fundamenta el conocimiento en la razón pura." },
+                    { w: "EXISTENCIA", def: "El existencialismo pone la existencia individual antes que la esencia." },
+                ]
+            },
+            {
+                id: 23, topic: "Astronomía Avanzada", color: "#9f7aea", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "MATERIA OSCURA", def: "Componente invisible del universo que solo se detecta por su gravedad." },
+                    { w: "QUASAR", def: "Núcleo galáctico extremadamente luminoso alimentado por un agujero negro." },
+                    { w: "ANTIMATERIA", def: "Materia compuesta de antipartículas, opuesta a la materia ordinaria." },
+                    { w: "EXOPLANETA", def: "Planeta que orbita una estrella fuera de nuestro sistema solar." },
+                    { w: "MAGNETAR", def: "Estrella de neutrones con campo magnético extraordinariamente intenso." },
+                    { w: "HORIZONTE", def: "El 'horizonte de sucesos' es el punto sin retorno de un agujero negro." },
+                ]
+            },
+            {
+                id: 24, topic: "Anatomía Avanzada", color: "#fc8181", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "HIPOTALAMO", def: "Región cerebral que regula temperatura, hambre y hormonas." },
+                    { w: "SINAPSIS", def: "Punto de conexión entre dos neuronas para transmitir señales." },
+                    { w: "HEMOGLOBINA", def: "Proteína de los glóbulos rojos que transporta el oxígeno." },
+                    { w: "PANCREAS", def: "Glándula que produce insulina y enzimas digestivas." },
+                    { w: "GANGLIO", def: "Grupo de neuronas fuera del sistema nervioso central." },
+                    { w: "TENDÓN", def: "Tejido fibroso que conecta el músculo al hueso." },
+                    { w: "CARTILAGO", def: "Tejido conectivo flexible que recubre las articulaciones." },
+                ]
+            },
+            {
+                id: 25, topic: "Civilizaciones Antiguas", color: "#f6ad55", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "MESOPOTAMIA", def: "Cuna de la civilización entre los ríos Tigris y Éufrates." },
+                    { w: "SUMERIOS", def: "Primera civilización que inventó la escritura cuneiforme." },
+                    { w: "BABILONIA", def: "Ciudad-estado mesopotámica famosa por el Código de Hammurabi." },
+                    { w: "JEROGLÍFICO", def: "Sistema de escritura pictográfica del Antiguo Egipto." },
+                    { w: "FENICIO", def: "Civilización marinera que creó el alfabeto que usamos hoy." },
+                    { w: "INCAS", def: "Imperio andino precolombino con capital en Cusco." },
+                    { w: "AZTECAS", def: "Imperio mesoamericano conocido por Tenochtitlán y el calendario solar." },
+                ]
+            },
+            {
+                id: 26, topic: "Tecnología & Inventos", color: "#76e4f7", diff: 4,
+                time: 220, gridSize: 15,
+                words: [
+                    { w: "IMPRENTA", def: "Invento de Gutenberg que revolucionó la difusión del conocimiento." },
+                    { w: "ELECTRICIDAD", def: "Fenómeno físico producido por cargas eléctricas en movimiento." },
+                    { w: "INTERNET", def: "Red global de comunicaciones que conecta millones de dispositivos." },
+                    { w: "ALGORITMO", def: "Conjunto de instrucciones para resolver un problema computacionalmente." },
+                    { w: "TRANSISTOR", def: "Componente semiconductor que revolucionó la electrónica moderna." },
+                    { w: "PENICILINA", def: "Primer antibiótico descubierto por Alexander Fleming en 1928." },
+                    { w: "VACUNA", def: "Preparado biológico que induce inmunidad contra enfermedades." },
+                ]
+            },
+            {
+                id: 27, topic: "Mitología", color: "#9f7aea", diff: 4,
+                time: 240, gridSize: 15,
+                words: [
+                    { w: "ZEUS", def: "Rey de los dioses del Olimpo en la mitología griega." },
+                    { w: "ATENEA", def: "Diosa griega de la sabiduría, las artes y la guerra estratégica." },
+                    { w: "HERCULES", def: "Héroe griego hijo de Zeus, famoso por sus doce trabajos." },
+                    { w: "ODIN", def: "Dios supremo de la mitología nórdica, padre de Thor." },
+                    { w: "QUETZALCOATL", def: "Dios serpiente emplumada de la mitología azteca." },
+                    { w: "PROMETEO", def: "Titán griego que robó el fuego a los dioses para darlo a los humanos." },
+                    { w: "MINOTAURO", def: "Criatura mitológica mitad hombre mitad toro, encerrada en el laberinto." },
+                ]
+            },
+            {
+                id: 28, topic: "Lingüística", color: "#68d391", diff: 5,
+                time: 220, gridSize: 15,
+                words: [
+                    { w: "SEMANTICA", def: "Rama de la lingüística que estudia el significado de las palabras." },
+                    { w: "SINTAXIS", def: "Estudio de las reglas que rigen la combinación de palabras en oraciones." },
+                    { w: "FONEMA", def: "Unidad mínima del sonido en una lengua que distingue significados." },
+                    { w: "MORFEMA", def: "Unidad mínima con significado gramatical en una lengua." },
+                    { w: "PRAGMATICA", def: "Estudio del uso del lenguaje en contextos comunicativos reales." },
+                    { w: "DIALECTO", def: "Variedad regional o social de una lengua." },
+                ]
+            },
+            {
+                id: 29, topic: "Cosmología", color: "#63b3ed", diff: 5,
+                time: 210, gridSize: 16,
+                words: [
+                    { w: "BIG BANG", def: "Teoría que explica el origen del universo como una gran explosión inicial." },
+                    { w: "INFLACION", def: "Expansión exponencial del universo en los primeros instantes tras el Big Bang." },
+                    { w: "ENTROPIA", def: "Medida del desorden en un sistema, tiende a aumentar con el tiempo." },
+                    { w: "MULTIVERSO", def: "Hipótesis que postula la existencia de múltiples universos paralelos." },
+                    { w: "SINGULARIDAD", def: "Punto de densidad infinita en el origen del Big Bang o en agujeros negros." },
+                    { w: "CONSTANTE", def: "La constante cosmológica de Einstein describe la energía oscura del universo." },
+                    { w: "RADIACION", def: "La radiación de fondo de microondas es el eco del Big Bang." },
+                ]
+            },
+            {
+                id: 30, topic: "Maestro del Conocimiento", color: "#f6ad55", diff: 5,
+                time: 200, gridSize: 16,
+                words: [
+                    { w: "EPISTEMOLOGIA", def: "Rama de la filosofía que estudia el origen, la naturaleza y los límites del conocimiento." },
+                    { w: "HERMENEUTICA", def: "Arte e interpretación de textos filosóficos, literarios y religiosos." },
+                    { w: "DIALECTICA", def: "Método de razonamiento por tesis, antítesis y síntesis." },
+                    { w: "PARADIGMA", def: "Modelo o ejemplo que sirve de referencia en una disciplina científica." },
+                    { w: "AXIOMA", def: "Proposición que se admite como evidente sin necesidad de demostración." },
+                    { w: "HEURISTICA", def: "Estrategia práctica para resolver problemas mediante el descubrimiento." },
+                    { w: "ONTOLOGIA", def: "Rama de la metafísica que estudia la naturaleza del ser y la existencia." },
+                    { w: "METAFISICA", def: "Rama de la filosofía que estudia los principios fundamentales de la realidad." },
+                ]
+            }
+        ];
+
+
+        // ═══════════════════════════════════════════════
+        // GAME STATE
+        // ═══════════════════════════════════════════════
+        let state = {
+            currentLevel: 0,
+            score: 0,
+            unlockedLevels: 1,
+            completedLevels: {},
+            hints: 3,
+            combo: 1,
+            comboTimer: null,
+            maxCombo: 1,
+            timerInterval: null,
+            timeLeft: 300,
+            grid: [],
+            gridSize: 12,
+            words: [],
+            foundWords: [],
+            placedWords: [],
+            selecting: false,
+            selStart: null,
+            selEnd: null,
+            selCells: [],
+            levelStartTime: 0,
+        };
+
+
+        // Load from localStorage
+        function loadState() {
+            try {
+                const s = localStorage.getItem('cosmoswords_v2');
+                if (s) {
+                    const d = JSON.parse(s);
+                    state.score = d.score || 0;
+                    state.unlockedLevels = d.unlockedLevels || 1;
+                    state.completedLevels = d.completedLevels || {};
+                }
+            } catch (e) { }
+        }
+
+
+        function saveState() {
+            try {
+                localStorage.setItem('cosmoswords_v2', JSON.stringify({
+                    score: state.score,
+                    unlockedLevels: state.unlockedLevels,
+                    completedLevels: state.completedLevels,
+                }));
+            } catch (e) { }
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // GRID GENERATION — ROBUST PLACEMENT
+        // ═══════════════════════════════════════════════
+        const DIRECTIONS = [
+            [0, 1], [1, 0], [0, -1], [-1, 0],   // horizontal, vertical
+            [1, 1], [1, -1], [-1, 1], [-1, -1]  // diagonals
+        ];
+
+
+        function canPlace(grid, word, row, col, dr, dc, size) {
+            for (let i = 0; i < word.length; i++) {
+                const r = row + dr * i, c = col + dc * i;
+                if (r < 0 || r >= size || c < 0 || c >= size) return false;
+                if (grid[r][c] !== '' && grid[r][c] !== word[i]) return false;
+            }
+            return true;
+        }
+
+
+        function placeWord(grid, word, row, col, dr, dc) {
+            const cells = [];
+            for (let i = 0; i < word.length; i++) {
+                const r = row + dr * i, c = col + dc * i;
+                grid[r][c] = word[i];
+                cells.push([r, c]);
+            }
+            return cells;
+        }
+
+
+        function generateGrid(levelData) {
+            const size = levelData.gridSize;
+            const words = levelData.words.map(w => ({
+                ...w,
+                // Remove spaces and accents for grid placement, keep original for display
+                clean: w.w.replace(/\s/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase()
+            }));
+
+
+            // Sort words longest first for better placement
+            const sorted = [...words].sort((a, b) => b.clean.length - a.clean.length);
+
+
+            let grid = Array.from({ length: size }, () => Array(size).fill(''));
+            const placed = [];
+
+
+            for (const wordObj of sorted) {
+                const word = wordObj.clean;
+                let success = false;
+
+
+                // Shuffle directions for variety
+                const dirs = [...DIRECTIONS].sort(() => Math.random() - 0.5);
+
+
+                // Try many random positions
+                for (let attempt = 0; attempt < 300 && !success; attempt++) {
+                    const dr = dirs[attempt % dirs.length][0];
+                    const dc = dirs[attempt % dirs.length][1];
+                    const row = Math.floor(Math.random() * size);
+                    const col = Math.floor(Math.random() * size);
+
+
+                    if (canPlace(grid, word, row, col, dr, dc, size)) {
+                        const cells = placeWord(grid, word, row, col, dr, dc);
+                        placed.push({ word: wordObj.w, clean: word, cells, def: wordObj.def });
+                        success = true;
+                    }
+                }
+
+
+                if (!success) {
+                    // Force place in a fresh row scan
+                    let forcePlaced = false;
+                    for (let r = 0; r < size && !forcePlaced; r++) {
+                        for (let c = 0; c < size && !forcePlaced; c++) {
+                            for (const [dr, dc] of DIRECTIONS) {
+                                if (canPlace(grid, word, r, c, dr, dc, size)) {
+                                    const cells = placeWord(grid, word, r, c, dr, dc);
+                                    placed.push({ word: wordObj.w, clean: word, cells, def: wordObj.def });
+                                    forcePlaced = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    // If still can't place (very long word in small grid), expand nothing—just skip
+                }
+            }
+
+
+            // Fill empty cells with random letters
+            const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let r = 0; r < size; r++)
+                for (let c = 0; c < size; c++)
+                    if (grid[r][c] === '') grid[r][c] = LETTERS[Math.floor(Math.random() * 26)];
+
+
+            return { grid, placed, size };
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // LOAD LEVEL
+        // ═══════════════════════════════════════════════
+        function loadLevel(idx) {
+            const lv = LEVELS[idx];
+            state.currentLevel = idx;
+            state.hints = 3;
+            state.combo = 1;
+            state.maxCombo = 1;
+            state.foundWords = [];
+            state.selecting = false;
+            state.selCells = [];
+
+
+            clearInterval(state.timerInterval);
+            state.timeLeft = lv.time;
+
+
+            // Generate grid
+            const { grid, placed, size } = generateGrid(lv);
+            state.grid = grid;
+            state.placedWords = placed;
+            state.gridSize = size;
+            state.words = placed;
+            state.levelStartTime = Date.now();
+
+
+            // Update UI
+            document.getElementById('level-num').textContent = lv.id;
+            document.getElementById('hdr-level').textContent = lv.id;
+            document.getElementById('grid-title').textContent = `📚 ${lv.topic}`;
+
+
+            const badge = document.getElementById('topic-badge');
+            badge.textContent = lv.topic;
+            badge.style.background = lv.color + '22';
+            badge.style.color = lv.color;
+            badge.style.border = `1px solid ${lv.color}44`;
+
+
+            // Difficulty
+            const ds = document.getElementById('diff-stars');
+            ds.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const d = document.createElement('div');
+                d.className = 'diff-star' + (i < lv.diff ? ' on' : '');
+                ds.appendChild(d);
+            }
+
+
+            // Milestone
+            const next = LEVELS[idx + 1];
+            document.getElementById('milestone-text').textContent =
+                next ? `Completa el nivel ${lv.id} para desbloquear: ${next.topic}` : '¡Eres el Maestro del Conocimiento!';
+
+
+            renderGrid();
+            renderWordList();
+            updateProgress();
+            startTimer();
+            updateScoreUI();
+            updateHintBtn();
+
+
+            document.getElementById('def-panel').innerHTML = '<span class="def-empty">Encuentra una palabra para ver su definición</span>';
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // RENDER GRID
+        // ═══════════════════════════════════════════════
+        function renderGrid() {
+            const t = document.getElementById('grid-table');
+            t.innerHTML = '';
+            for (let r = 0; r < state.gridSize; r++) {
+                const tr = document.createElement('tr');
+                for (let c = 0; c < state.gridSize; c++) {
+                    const td = document.createElement('td');
+                    td.className = 'grid-cell';
+                    td.textContent = state.grid[r][c];
+                    td.dataset.r = r; td.dataset.c = c;
+                    td.addEventListener('mousedown', onCellDown);
+                    td.addEventListener('mouseenter', onCellEnter);
+                    td.addEventListener('touchstart', onTouchStart, { passive: false });
+                    td.addEventListener('touchmove', onTouchMove, { passive: false });
+                    tr.appendChild(td);
+                }
+                t.appendChild(tr);
+            }
+            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('touchend', onTouchEnd);
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // SELECTION LOGIC
+        // ═══════════════════════════════════════════════
+        function getCellsInLine(r1, c1, r2, c2) {
+            const dr = r2 - r1, dc = c2 - c1;
+            const len = Math.max(Math.abs(dr), Math.abs(dc));
+            if (len === 0) return [[r1, c1]];
+
+
+            // Check if it's a valid direction
+            const normR = dr === 0 ? 0 : dr / Math.abs(dr);
+            const normC = dc === 0 ? 0 : dc / Math.abs(dc);
+
+
+            // Only allow 8 directions
+            if (Math.abs(dr) !== Math.abs(dc) && dr !== 0 && dc !== 0) return [[r1, c1]];
+
+
+            const cells = [];
+            for (let i = 0; i <= len; i++) cells.push([r1 + normR * i, c1 + normC * i]);
+            return cells;
+        }
+
+
+        function highlightSelecting(cells) {
+            document.querySelectorAll('.grid-cell.selecting').forEach(el => el.classList.remove('selecting'));
+            cells.forEach(([r, c]) => {
+                const cell = document.querySelector(`.grid-cell[data-r="${r}"][data-c="${c}"]`);
+                if (cell) cell.classList.add('selecting');
+            });
+        }
+
+
+        function onCellDown(e) {
+            e.preventDefault();
+            state.selecting = true;
+            const r = +e.currentTarget.dataset.r, c = +e.currentTarget.dataset.c;
+            state.selStart = [r, c];
+            state.selEnd = [r, c];
+            state.selCells = [[r, c]];
+            highlightSelecting([[r, c]]);
+            document.getElementById('selection-info').textContent = state.grid[r][c];
+        }
+
+
+        function onCellEnter(e) {
+            if (!state.selecting) return;
+            const r = +e.currentTarget.dataset.r, c = +e.currentTarget.dataset.c;
+            state.selEnd = [r, c];
+            const cells = getCellsInLine(state.selStart[0], state.selStart[1], r, c);
+            state.selCells = cells;
+            highlightSelecting(cells);
+            const word = cells.map(([rr, cc]) => state.grid[rr][cc]).join('');
+            document.getElementById('selection-info').textContent = word;
+        }
+
+
+        function onMouseUp() {
+            if (!state.selecting) return;
+            state.selecting = false;
+            checkSelection();
+        }
+
+
+        function onTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && el.classList.contains('grid-cell')) {
+                state.selecting = true;
+                const r = +el.dataset.r, c = +el.dataset.c;
+                state.selStart = [r, c]; state.selEnd = [r, c]; state.selCells = [[r, c]];
+                highlightSelecting([[r, c]]);
+            }
+        }
+
+
+        function onTouchMove(e) {
+            e.preventDefault();
+            if (!state.selecting) return;
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && el.classList.contains('grid-cell')) {
+                const r = +el.dataset.r, c = +el.dataset.c;
+                state.selEnd = [r, c];
+                const cells = getCellsInLine(state.selStart[0], state.selStart[1], r, c);
+                state.selCells = cells;
+                highlightSelecting(cells);
+                const word = cells.map(([rr, cc]) => state.grid[rr][cc]).join('');
+                document.getElementById('selection-info').textContent = word;
+            }
+        }
+
+
+        function onTouchEnd() {
+            if (!state.selecting) return;
+            state.selecting = false;
+            checkSelection();
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // CHECK SELECTION
+        // ═══════════════════════════════════════════════
+        function checkSelection() {
+            document.querySelectorAll('.grid-cell.selecting').forEach(el => el.classList.remove('selecting'));
+
+
+            const selectedWord = state.selCells.map(([r, c]) => state.grid[r][c]).join('');
+            const selectedWordRev = selectedWord.split('').reverse().join('');
+
+
+            let found = null;
+            for (const pw of state.placedWords) {
+                if (state.foundWords.includes(pw.word)) continue;
+                if (pw.clean === selectedWord || pw.clean === selectedWordRev) {
+                    // Verify cells match
+                    const cellsMatch = pw.cells.every(([r, c]) => state.selCells.some(([sr, sc]) => sr === r && sc === c));
+                    const cellsMatchRev = pw.cells.every(([r, c]) => state.selCells.some(([sr, sc]) => sr === r && sc === c));
+                    if (cellsMatch || cellsMatchRev) {
+                        found = pw;
+                        break;
+                    }
+                    // Also check just by word match (more forgiving)
+                    found = pw;
+                    break;
+                }
+            }
+
+
+            if (found) {
+                wordFound(found);
+            } else {
+                document.getElementById('selection-info').textContent = 'Selecciona letras arrastrando';
+                // Reset combo on wrong
+                // (optional: don't reset combo on wrong, only on timeout)
+            }
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // WORD FOUND
+        // ═══════════════════════════════════════════════
+        function wordFound(pw) {
+            state.foundWords.push(pw.word);
+
+
+            // Color found cells
+            const colorIdx = state.foundWords.length % 8;
+            pw.cells.forEach(([r, c]) => {
+                const cell = document.querySelector(`.grid-cell[data-r="${r}"][data-c="${c}"]`);
+                if (cell) {
+                    cell.classList.add('found-cell', `found-${colorIdx}`);
+                }
+            });
+
+
+            // Combo
+            state.combo = Math.min(state.combo + 1, 8);
+            if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+            clearTimeout(state.comboTimer);
+            state.comboTimer = setTimeout(() => { state.combo = 1; updateComboUI(); }, 5000);
+
+
+            // Score
+            const basePoints = pw.clean.length * 10;
+            const timeBonus = Math.floor(state.timeLeft * 0.5);
+            const comboBonus = basePoints * (state.combo - 1);
+            const total = basePoints + timeBonus + comboBonus;
+            state.score += total;
+
+
+            // Show score pop
+            showScorePop(total, pw.cells[0]);
+
+
+            // Flash
+            showFoundFlash(pw.word);
+            showToast(`✨ ${pw.word} +${total}pts`);
+
+
+            // Show definition
+            showDefinition(pw);
+
+
+            // Update UI
+            renderWordList();
+            updateProgress();
+            updateScoreUI();
+            updateComboUI();
+            saveState();
+
+
+            document.getElementById('selection-info').textContent = `✓ ${pw.word}`;
+
+
+            // Check level complete
+            if (state.foundWords.length === state.placedWords.length) {
+                setTimeout(levelComplete, 800);
+            }
+        }
+
+
+        function showScorePop(pts, cell) {
+            const el = document.createElement('div');
+            el.className = 'score-pop';
+            el.textContent = `+${pts}`;
+            document.body.appendChild(el);
+
+
+            // Position near cell
+            const gridCell = document.querySelector(`.grid-cell[data-r="${cell[0]}"][data-c="${cell[1]}"]`);
+            if (gridCell) {
+                const rect = gridCell.getBoundingClientRect();
+                el.style.left = rect.left + 'px';
+                el.style.top = rect.top + 'px';
+            }
+
+
+            setTimeout(() => el.classList.add('show'), 50);
+            setTimeout(() => { el.remove(); }, 900);
+        }
+
+
+        function showFoundFlash(word) {
+            const el = document.getElementById('found-flash');
+            el.textContent = `✨ ${word}`;
+            el.className = 'found-flash show';
+            setTimeout(() => { el.className = 'found-flash hide'; setTimeout(() => { el.className = 'found-flash'; }, 600); }, 1000);
+        }
+
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+
+        function showDefinition(pw) {
+            const panel = document.getElementById('def-panel');
+            panel.innerHTML = `<span class="def-word">${pw.word}</span>${pw.def}`;
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // UI UPDATES
+        // ═══════════════════════════════════════════════
+        function renderWordList() {
+            const lv = LEVELS[state.currentLevel];
+            const list = document.getElementById('word-list');
+            list.innerHTML = '';
+            state.placedWords.forEach(pw => {
+                const isFound = state.foundWords.includes(pw.word);
+                const div = document.createElement('div');
+                div.className = 'word-item' + (isFound ? ' found' : '');
+                div.innerHTML = `<div class="word-dot"></div><span>${pw.word}</span><div class="word-strikethrough"></div>`;
+                list.appendChild(div);
+            });
+        }
+
+
+        function updateProgress() {
+            const total = state.placedWords.length;
+            const found = state.foundWords.length;
+            const pct = total ? (found / total * 100) : 0;
+            document.getElementById('prog-fill').style.width = pct + '%';
+            document.getElementById('prog-text').textContent = `${found}/${total}`;
+        }
+
+
+        function updateScoreUI() {
+            document.getElementById('score-display').textContent = state.score.toLocaleString();
+            document.getElementById('hdr-score').textContent = state.score.toLocaleString();
+        }
+
+
+        function updateComboUI() {
+            const c = state.combo;
+            document.getElementById('combo-num').textContent = `x${c}`;
+            document.getElementById('hdr-combo').textContent = `x${c}`;
+            document.getElementById('combo-fill').style.width = ((c - 1) / 7 * 100) + '%';
+        }
+
+
+        function updateHintBtn() {
+            const btn = document.getElementById('hint-btn');
+            btn.textContent = `💡 PISTA (${state.hints} restantes)`;
+            btn.disabled = state.hints <= 0;
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // TIMER
+        // ═══════════════════════════════════════════════
+        function startTimer() {
+            clearInterval(state.timerInterval);
+            const lv = LEVELS[state.currentLevel];
+            state.timeLeft = lv.time;
+            updateTimerUI();
+
+
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                updateTimerUI();
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+
+        function updateTimerUI() {
+            const m = Math.floor(state.timeLeft / 60);
+            const s = state.timeLeft % 60;
+            const str = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            const el = document.getElementById('timer-display');
+            el.textContent = str;
+            el.className = 'timer-display' + (state.timeLeft <= 30 ? ' urgent' : '');
+        }
+
+
+        function timeUp() {
+            // Show modal with time up message
+            document.getElementById('modal-icon').textContent = '⏰';
+            document.getElementById('modal-title').textContent = '¡TIEMPO AGOTADO!';
+            document.getElementById('modal-sub').textContent = `Encontraste ${state.foundWords.length} de ${state.placedWords.length} palabras`;
+            document.getElementById('modal-score').textContent = state.score.toLocaleString();
+            document.getElementById('modal-time').textContent = '0s';
+            document.getElementById('modal-combo').textContent = `x${state.maxCombo}`;
+            document.getElementById('modal-btn').textContent = 'REINTENTAR NIVEL';
+            document.getElementById('modal-btn').onclick = () => { document.getElementById('modal').classList.remove('show'); loadLevel(state.currentLevel); };
+            document.getElementById('modal').classList.add('show');
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // LEVEL COMPLETE
+        // ═══════════════════════════════════════════════
+        function levelComplete() {
+            clearInterval(state.timerInterval);
+            const lv = LEVELS[state.currentLevel];
+            const elapsed = Math.floor((Date.now() - state.levelStartTime) / 1000);
+            const timeBonus = state.timeLeft * 5;
+            state.score += timeBonus;
+
+
+            // Unlock next
+            const nextIdx = state.currentLevel + 1;
+            if (nextIdx < LEVELS.length && nextIdx + 1 > state.unlockedLevels) {
+                state.unlockedLevels = nextIdx + 1;
+            }
+            state.completedLevels[state.currentLevel] = true;
+            saveState();
+
+
+            document.getElementById('modal-icon').textContent = '🎉';
+            document.getElementById('modal-title').textContent = '¡NIVEL COMPLETADO!';
+            document.getElementById('modal-sub').textContent = `Todas las palabras encontradas • +${timeBonus} bonus de tiempo`;
+            document.getElementById('modal-score').textContent = state.score.toLocaleString();
+            document.getElementById('modal-time').textContent = elapsed + 's';
+            document.getElementById('modal-combo').textContent = `x${state.maxCombo}`;
+
+
+            if (nextIdx < LEVELS.length) {
+                document.getElementById('modal-btn').textContent = `NIVEL ${nextIdx + 1}: ${LEVELS[nextIdx].topic} →`;
+                document.getElementById('modal-btn').onclick = nextLevel;
+            } else {
+                document.getElementById('modal-btn').textContent = '🏆 ¡JUEGO COMPLETADO!';
+                document.getElementById('modal-btn').onclick = () => { document.getElementById('modal').classList.remove('show'); showLevelSelect(); };
+            }
+            document.getElementById('modal').classList.add('show');
+            updateScoreUI();
+        }
+
+
+        function nextLevel() {
+            document.getElementById('modal').classList.remove('show');
+            const next = state.currentLevel + 1;
+            if (next < LEVELS.length) loadLevel(next);
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // HINT
+        // ═══════════════════════════════════════════════
+        function useHint() {
+            if (state.hints <= 0) return;
+            const unfound = state.placedWords.filter(pw => !state.foundWords.includes(pw.word));
+            if (!unfound.length) return;
+            const pw = unfound[Math.floor(Math.random() * unfound.length)];
+            // Highlight first cell
+            const [r, c] = pw.cells[0];
+            const cell = document.querySelector(`.grid-cell[data-r="${r}"][data-c="${c}"]`);
+            if (cell) {
+                cell.classList.add('hint-cell');
+                setTimeout(() => cell.classList.remove('hint-cell'), 3000);
+            }
+            state.hints--;
+            updateHintBtn();
+            showToast(`💡 Pista: busca "${pw.word[0]}..."`);
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // LEVEL SELECT
+        // ═══════════════════════════════════════════════
+        function showLevelSelect() {
+            const grid = document.getElementById('levels-grid');
+            grid.innerHTML = '';
+            LEVELS.forEach((lv, idx) => {
+                const unlocked = idx < state.unlockedLevels;
+                const completed = !!state.completedLevels[idx];
+                const div = document.createElement('div');
+                div.className = 'level-card' + (!unlocked ? ' locked' : '') + (completed ? ' completed' : '');
+                div.innerHTML = `
+     <div class="lc-num">${lv.id}</div>
+     <div class="lc-topic">${lv.topic}</div>
+     <div class="lc-stars">${[0, 1, 2, 3, 4].map(i => `<div class="lc-star${i < lv.diff ? ' on' : ''}"></div>`).join('')}</div>
+     ${!unlocked ? '<div class="lc-lock">🔒</div>' : completed ? '<div class="lc-check">✓</div>' : ''}
+   `;
+                if (unlocked) div.onclick = () => { hideLevelSelect(); loadLevel(idx); };
+                grid.appendChild(div);
+            });
+            document.getElementById('level-select-screen').classList.add('show');
+        }
+
+
+        function hideLevelSelect() {
+            document.getElementById('level-select-screen').classList.remove('show');
+        }
+
+
+        // ═══════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════
+        loadState();
+        loadLevel(0);
+    </script>
+</body>
+
+</html>
